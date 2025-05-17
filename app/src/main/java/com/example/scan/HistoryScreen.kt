@@ -25,7 +25,7 @@ fun HistoryScreen(scannedImages: SnapshotStateList<Uri>, navController: NavHostC
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Scan History") },
+                title = { Text("Your Document Files") },
                 navigationIcon = {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
