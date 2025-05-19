@@ -12,22 +12,32 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.unit.sp
 
 @Composable
 fun MainScreen(
     navController: NavHostController,
     buttons: List<String>
 ){
-    LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
+    Column(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+            .fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        items(buttons) { label ->
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(2),
+            modifier = Modifier
+                .wrapContentSize()
+                .padding(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(buttons) { label ->
                 Box(
                     modifier = Modifier
                         .aspectRatio(1f)
@@ -38,6 +48,7 @@ fun MainScreen(
                                 "Scan Documents" -> navController.navigate("scan")
                                 "History" -> navController.navigate("history")
                                 "Scan Barcode" -> navController.navigate("barcode")
+                                "Settings" -> navController.navigate("settings")
                             }
                         },
                         modifier = Modifier
@@ -48,8 +59,10 @@ fun MainScreen(
                                 "Scan Documents" -> colorResource(id = R.color.pastel_green)
                                 "History" -> colorResource(id = R.color.pastel_yellow)
                                 "Scan Barcode" -> colorResource(id = R.color.pastel_blue)
+                                "Settings" ->colorResource(id = R.color.pastel_pink)
                                 else -> MaterialTheme.colorScheme.primary
-                            }
+                            },
+                            contentColor = Color.Black
                         )
                     ) {
                         Text(label)
@@ -57,47 +70,7 @@ fun MainScreen(
                 }
             }
         }
+    }
+
 }
-
-//
-//    Column(
-//        modifier = Modifier
-//            .fillMaxSize()
-//            .padding(16.dp),
-//        verticalArrangement = Arrangement.Center,
-//        horizontalAlignment = Alignment.CenterHorizontally
-//    ) {
-//        Row(
-//            modifier = Modifier
-//                .fillMaxWidth()
-//                .padding(16.dp),
-//            horizontalArrangement = Arrangement.Center,
-//        ) {
-//            // Кнопка для перехода на экран сканирования
-//            Button(
-//                onClick = {
-//                    navController.navigate("scan")
-//                } ) {
-//                Text("Scan Documents")
-//            }
-//
-//            Spacer(modifier = Modifier
-//                .width(16.dp))
-//
-//            Button(onClick = {
-//                // Переход на экран "history"
-//                navController.navigate("history")
-//            }) {
-//                Text("History")
-//            }
-//        }
-//
-//
-//        Button(onClick = {
-//            navController.navigate("barcode")
-//        }) {
-//            Text("Scan Barcode")
-//        }
-//    }
-
 

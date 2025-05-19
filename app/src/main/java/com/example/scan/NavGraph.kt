@@ -14,15 +14,18 @@ import com.example.scan.HistoryScreen
 fun NavGraph(navController: NavHostController, scannedImages: SnapshotStateList<Uri>) {
     NavHost(navController, startDestination = "main") {
         composable("main") {
-            MainScreen(navController, listOf("Scan Documents", "History", "Scan Barcode"))
+            MainScreen(navController, listOf("Scan Documents", "History", "Scan Barcode", "Settings"))
         }
         composable("history") {
-            HistoryScreen(scannedImages, navController)
+            HistoryScreen(navController)
         }
         composable("barcode") { BarcodeScannerScreen(navController)
         }
         composable("scan"){
             ScanScreen(navController,scannedImages)
+        }
+        composable("settings") {
+            SettingScreen(navController)
         }
 
 

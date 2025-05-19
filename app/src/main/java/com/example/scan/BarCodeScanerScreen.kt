@@ -10,10 +10,16 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily.Companion.Serif
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.common.InputImage
 import kotlinx.coroutines.launch
@@ -21,6 +27,9 @@ import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
+import com.example.scan.database.ScanDatabase
+import com.example.scan.module.ScanEntry
+import com.example.scan.ui.theme.ScanTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -29,6 +38,8 @@ fun BarcodeScannerScreen(navController: NavHostController) {
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
     var imageUri by remember { mutableStateOf<Uri?>(null) }
+    val db = ScanDatabase.getDatabase(context)
+    val dao = db.scanDao()
 
     // Камера: создаём Uri перед запуском
     var cameraImageUri by remember { mutableStateOf<Uri?>(null) }
@@ -74,6 +85,10 @@ fun BarcodeScannerScreen(navController: NavHostController) {
                         if (barcodes.isNotEmpty()) {
                             val value = barcodes[0].rawValue
                             value?.let {
+                                scope.launch {
+                                    dao.insert(ScanEntry(uri  =null, barcodeValue = it))
+                                    println("✅ Вставлен штрих-код в базу: $it")
+                                }
                                 val intent = if (it.startsWith("http")) {
                                     Intent(Intent.ACTION_VIEW, Uri.parse(it))
                                 } else {
@@ -114,19 +129,51 @@ fun BarcodeScannerScreen(navController: NavHostController) {
                 .fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Button(onClick = {
-                val uri = createImageUri()
-                cameraImageUri = uri
-                uri?.let { takePictureLauncher.launch(it) }
-            }, modifier = Modifier.fillMaxWidth()) {
-                Text("Take picture")
+            Row(modifier = Modifier
+                .padding(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Button(onClick = {
+                    val uri = createImageUri()
+                    cameraImageUri = uri
+                    uri?.let { takePictureLauncher.launch(it) }
+                }, modifier = Modifier.fillMaxWidth()
+                    .weight(1f)
+                    .height(52.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = colorResource(id = R.color.button_color),
+                        contentColor = Color.White,
+                        disabledContainerColor = Color.Gray,
+                        disabledContentColor = Color.LightGray
+                    ))
+                {
+                    Text("Take picture")
+                }
+
+                Button(onClick = {
+                    pickImageLauncher.launch("image/*")
+                }, modifier = Modifier.fillMaxWidth()
+                    .weight(1f)
+                    .height(52.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = colorResource(id = R.color.button_color),
+                        contentColor = Color.White,
+                        disabledContainerColor = Color.Gray,
+                        disabledContentColor = Color.LightGray
+                    )) {
+                    Text("Open gallery")
+                }
             }
 
-            Button(onClick = {
-                pickImageLauncher.launch("image/*")
-            }, modifier = Modifier.fillMaxWidth()) {
-                Text("Open gallery")
-            }
         }
     }
 }
+@Preview(showBackground = true)
+@Composable
+fun BarcodeScannerScreenPreview() {
+    ScanTheme {
+        // Используем фейковый NavController для превью
+        BarcodeScannerScreen(navController = rememberNavController())
+    }
+}
+

@@ -5,6 +5,7 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,6 +18,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -40,12 +42,19 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily.Companion.Serif
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.text.isDigitsOnly
 import androidx.navigation.NavHostController
+import com.example.scan.database.ScanDatabase
+import com.example.scan.module.ScanEntry
 import com.google.mlkit.vision.documentscanner.GmsDocumentScannerOptions
 import com.google.mlkit.vision.documentscanner.GmsDocumentScanning
 import com.google.mlkit.vision.documentscanner.GmsDocumentScanningResult
@@ -71,6 +80,10 @@ fun ScanScreen(
     var enableGalleryImport by remember { mutableStateOf(true) }
     var pageLimit by remember { mutableIntStateOf(2) }
     var scannerMode by remember { mutableIntStateOf(GmsDocumentScannerOptions.SCANNER_MODE_FULL) }
+    val db = ScanDatabase.getDatabase(context)
+    val dao = db.scanDao()
+
+
 
     // Запуск сканера
     val scannerLauncher =
@@ -80,7 +93,12 @@ fun ScanScreen(
                 gmsResult?.pages?.forEach { page ->
                     val imageUri = page.imageUri
                     val savedUri = saveImageToGallery(context, imageUri)
-                    savedUri?.let { scannedImages.add(it) }
+                    savedUri?.let {
+                        scannedImages.add(it)
+                        scope.launch {
+                            dao.insert(ScanEntry(uri = it.toString(), barcodeValue = null))
+                            println("✅ Вставлено в базу: $it")
+                        }}
                 }
             }
         }
@@ -109,7 +127,7 @@ fun ScanScreen(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(text = stringResource(R.string.scanner_feature_mode))
+                Text(text = stringResource(R.string.scanner_feature_mode),)
                 ExposedDropdownMenuBox(
                     expanded = expanded,
                     onExpandedChange = { expanded = it },
@@ -199,7 +217,14 @@ fun ScanScreen(
                             snackbarHostState.showSnackbar(it.localizedMessage ?: "Smth went wrong")
                         }
                     }
-            }) {
+            },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = colorResource(id = R.color.button_color)
+                )
+            ) {
                 Text(stringResource(R.string.scan))
             }
         }

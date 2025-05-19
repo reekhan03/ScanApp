@@ -11,4 +11,6 @@
     <color name="pastel_yellow">#FFFAF4DC</color>
     <color name="pastel_green">#FFDDEDEA</color>
     <color name="pastel_blue">#FFDAEAF7</color>
+    <color name="button_color">#FF5C3BFE</color>
+
 </resources>
